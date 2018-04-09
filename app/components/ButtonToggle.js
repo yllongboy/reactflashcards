@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TouchableWithoutFeedback, Animated, Easing, Platform } from 'react-native';
 
-import Button from 'Buttton'
+import Button from './Button'
 
 const styles = StyleSheet.create({
+    // ...
     iconContainer: {
         margin: 16,
         alignItems: 'center',
@@ -11,7 +12,7 @@ const styles = StyleSheet.create({
     },
 });
 
-class RippleEffect extends Component {
+class ButtonToggle extends Component {
   constructor(props, context) {
       super(props, context);
 
@@ -29,8 +30,8 @@ class RippleEffect extends Component {
   }
   onPressedIn() {
       Animated.timing(this.state.scaleValue, {
-          toValue: 100,
-          duration: 8000,
+          toValue: 1,
+          duration: 225,
           easing: Easing.bezier(0.0, 0.0, 0.2, 1),
           useNativeDriver: Platform.OS === 'android',
       }).start();
@@ -76,9 +77,13 @@ class RippleEffect extends Component {
               <View style={[styles.iconContainer, iconContainer]}>
                   {this.renderRippleView()}
                   <View>
-                    <ThemeProvider uiTheme={uiTheme}>
-                      <Icon name={name} size={size} color={color} style={{backgroundColor: 'transparent'}}/>
-                    </ThemeProvider>
+                    <Button
+                      ripple={true}
+                      color="green"
+                      size="20"
+                    >
+                      Flash Cards
+                    </Button>
                   </View>
               </View>
           </TouchableWithoutFeedback>
@@ -86,4 +91,4 @@ class RippleEffect extends Component {
   }
 }
 
-module.exports = RippleEffect;
+module.exports = ButtonToggle;

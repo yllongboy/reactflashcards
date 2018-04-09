@@ -1,13 +1,13 @@
 'use strict'
 import React, {Component} from 'react'
-import { View, StyleSheet } from 'react-native'
+import { StatusBar, StyleSheet } from 'react-native'
 
 class StatusBarBackground extends Component {
 
   render() {
     return (
-      <View style={[styles.statusBarBackground, this.props.style || {}]}>
-      </View>
+      <StatusBar translucent={true} backgroundColor={'rgba(0, 0, 0, 0.3)'} style={[styles.statusBarBackground, this.props.style || {}]}>
+      </StatusBar>
     )
   }
 }
@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
 
   statusBarBackground: {
     height: 20,
-    backgroundColor: "white"
+    backgroundColor: "#1CD8D2"
   }
 
 })

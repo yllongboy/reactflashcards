@@ -3,14 +3,35 @@ import { StyleSheet } from 'react-native';
 export const colors = {
     black: '#1a1917',
     gray: '#888888',
-    background1: 'hsl(15, 55%, 50%)',
-    background2: 'hsl(230, 30%, 45%)'
+    background0: '#1FA2FF',
+    background1: '#1CD8D2',
+    background2: '#93EDC7',
+    background3: '#B2FEFA',
+    background4: '#0ED2F7',
+    background5: '#29ffc6',
+    background6: '#4AC29A',
+    background7: '#BDFFF3',
+    background8: '#56ab2f',
+    background9: '#a8e063'
 };
 
 export default StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background1
+    },
+    gradient: {
+        ...StyleSheet.absoluteFillObject
+    },
+    scrollview: {
+        flex: 1,
+        paddingTop: 50
+    },
+    scrollviewContentContainer: {
+        paddingBottom: 50
+    },
+    exampleContainer: {
+        marginBottom: 30
     },
     colorsContainer: {
         ...StyleSheet.absoluteFillObject,

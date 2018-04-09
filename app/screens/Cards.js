@@ -6,8 +6,6 @@ import {
   StyleSheet,
   ListView,
   AlertIOS,
-  Animated,
-  ScrollView,
   TouchableOpacity,
   TouchableHighlight,
   AsyncStorage,
@@ -18,17 +16,14 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Swipeout from 'react-native-swipeout';
 import Button from '../components/Button';
+import LinearGradient from 'react-native-linear-gradient';
 import Spacer from '../components/Spacer';
 import ViewContainer from '../components/ViewContainer'
 import StatusBarBackground from '../components/StatusBarBackground'
+import themes, { colors } from '../styles/Default';
 
 const data = []
 var mapObj = new Map()
-const HEADER_MAX_HEIGHT = 200;
-const HEADER_MIN_HEIGHT = 60;
-const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
-
-const backgroundColors = ['#212122', '#414141'];
 
 class Cards extends Component {
   constructor(props) {
@@ -36,9 +31,9 @@ class Cards extends Component {
     this.state = {
       loading: true,
       localStorageDataSource: null,
-      collection: null,
-      scrollY: new Animated.Value(0)
+
     }
+    var collection = null;
   }
 
   componentWillMount() {
@@ -52,7 +47,7 @@ class Cards extends Component {
          let value = store[i][1];
          mapObj.set(key, value);
         });
-        this.setState({collection: mapObj});
+        this.collection = mapObj;
       });
     });
   }
@@ -67,11 +62,12 @@ class Cards extends Component {
       if (data.length > 0) {
         return (
           <ListView
+            key={this.data}
             style={styles.listContainer}
             initialListSize={20}
             enableEmptySections={true}
             dataSource={this.state.localStorageDataSource}
-            renderRow={(data) => { return this._renderRow(data)}}
+            renderRow={(data, sectionID, rowID) => { return this._renderRow(data,rowID)}}
           />
         )
       } else {
@@ -83,99 +79,112 @@ class Cards extends Component {
   }
 
   render() {
-    const headerHeight = this.state.scrollY.interpolate({
-      inputRange: [0, HEADER_SCROLL_DISTANCE],
-      outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
-      extrapolate: 'clamp'
-    });
-    const imageOpacity = this.state.scrollY.interpolate({
-      inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
-      outputRange: [1, 1, 0],
-      extrapolate: 'clamp',
-    });
-    const imageTranslate = this.state.scrollY.interpolate({
-      inputRange: [0, HEADER_SCROLL_DISTANCE],
-      outputRange: [0, -50],
-      extrapolate: 'clamp',
-    });
-
     return (
       <ViewContainer>
         <StatusBarBackground/>
-        <View style={styles.listContainer}>
-          <ScrollView
-            style={styles.fill}
-            scrollEventThrottle={16}
-            onScroll={Animated.event(
-              [{nativeEvent: {contentOffset: {y: this.state.srollY}}}]
-            )}
-          >
-            {this.renderList()}
-          </ScrollView>
-          <Animated.View style={styles.bar}>
-            <Text style={styles.title}>`List of Vocabulary`</Text>
-          </Animated.View>
+        {this.gradient}
+        <View style={styles.headerContainer}>
+          <TouchableOpacity  onPress={() => this.props.navigator.pop()}>
+            <View style={styles.innerHeaderContainer}>
+            <Icon name="angle-left" size={30} style={styles.arrowIcon} />
+            <Spacer/>
+            <Text style={styles.headerText}>Back</Text>
+            </View>
+          </TouchableOpacity>
         </View>
+        {this.renderList()}
       </ViewContainer>
     )
   }
 
-  alert() {
+  get gradient () {
+      return (
+          <LinearGradient
+            colors={[colors.background3, colors.background4, colors.background5]}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={themes.gradient}
+          />
+      );
+  }
+
+  _alert() {
     AlertIOS.alert('shit', 'tons of shit');
   }
-  _renderRow(data) {
+  _renderRow(data, rowID) {
     var swipeoutBtns = [
       {
-        text: 'Button',
+        text: 'Delete',
+        autoClose: true,
+        backgroundColor: 'red',
+        close: 'true',
+        onPress: async function() {
+          await AsyncStorage.removeItem(data);
+          this.collection.delete(data);
+          var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
+          this.state.localStorageDataSource = ds.cloneWithRows(this.collection);
+
+          this._alert();
+        }.bind(this),
         right: [
           {
             text: 'Press Me',
-            onPress: function(){ this.alert() },
             type: 'primary',
           }
         ],
       }
     ]
     return (
-
-      <TouchableOpacity onPress={(event) => this._navigateToFlashCards(data)}>
-        <View style={styles.listItemContainer}>
-          <Text style={styles.listItem}>{data}</Text>
-        </View>
-      </TouchableOpacity>
+      <Swipeout right={swipeoutBtns} autoClose={true}  backgroundColor="transparent" onClose={() => console.log('s')}>
+        <TouchableOpacity onPress={(event) => this._navigateToFlashCards(data,rowID)}>
+          <View style={styles.listItemContainer}>
+            <Text style={styles.listItem}>{data}</Text>
+          </View>
+        </TouchableOpacity>
+      </Swipeout>
 
 
     )
   }
 
-  async _navigateToFlashCards(data) {
+  async _navigateToFlashCards(data,rowID) {
     const value = await AsyncStorage.getItem(data);
+    console.log("shit", rowID);
     this.props.navigator.push({
       ident: "FlashCards",
       data,
       value,
-      collection: this.state.collection
+      rowID,
+      collection: this.collection
     })
   }
 }
 
 const styles = StyleSheet.create({
   listContainer: {
-    marginTop: 20,
+    // marginTop: 20,
     flex: 1
   },
   listItemContainer: {
-    margin: 10,
+    paddingLeft: 16,
+    paddingTop: 14,
+    paddingBottom: 16,
     borderBottomColor: "rgba(92,94,94,0.5)",
     borderBottomWidth: 0.25
   },
   listItem: {
     fontSize: 15,
-    color: '#A6AAAB',
+    // color: '#A6AAAB',
+    color: 'white',
     padding: 5
   },
   arrowIcon: {
-    color: "green",
+    color: "white",
+    fontWeight: 'bold'
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 20
   },
   headerContainer: {
     margin: 10,
@@ -186,12 +195,6 @@ const styles = StyleSheet.create({
   innerHeaderContainer: {
     flexDirection: "row",
     alignItems: "center"
-  },
-  bar: {
-    marginTop: 28,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  }
 })
 module.exports = Cards

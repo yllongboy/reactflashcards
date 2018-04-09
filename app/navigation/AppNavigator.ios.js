@@ -44,6 +44,7 @@ class AppNavigator extends Component {
             <FlashCards
               data={route.data}
               value={route.value}
+              rowID={route.rowID}
               collection={route.collection}
               {...globalNavigatorProps}
             />

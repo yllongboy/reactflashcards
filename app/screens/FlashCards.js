@@ -5,6 +5,7 @@ import {
   StyleSheet,
   View,
   AlertIOS,
+  Platform,
   AsyncStorage,
   TouchableOpacity,
   Modal,
@@ -14,40 +15,65 @@ import {
 } from 'react-native'
 
 import Icon from 'react-native-vector-icons/FontAwesome'
+import LinearGradient from 'react-native-linear-gradient';
 import Carousel from 'react-native-snap-carousel'
 import Spacer from '../components/Spacer'
 import SliderEntry from '../components/SliderEntry'
 import ViewContainer from '../components/ViewContainer'
 import StatusBarBackground from '../components/StatusBarBackground'
+import { sliderWidth, itemWidth } from '../styles/SliderEntry.style';
+import themes, { colors } from '../styles/Default';
+import { BlurView, VibrancyView } from 'react-native-blur'
 
-const horizontalMargin = 20;
-const slideWidth = 280;
+
 const { width, height } = Dimensions.get('window');
-const sliderWidth = Dimensions.get('window').width;
-const itemWidth = slideWidth + horizontalMargin * 2;
-const itemHeight = 200;
 
 class FlashCards extends Component {
   constructor(props) {
     super(props)
     this.state= {
-      modalVisible: true
+      modalVisible: true,
+      slider1ActiveSlide: this.props.rowID,
     }
+  }
+
+  _renderItemWithParallax ({item, index}, parallaxProps) {
+      return (
+          <SliderEntry
+            data={item}
+            even={(index + 1) % 2 === 0}
+            parallax={true}
+            parallaxProps={parallaxProps}
+          />
+      );
+  }
+
+  get gradient () {
+      return (
+          <LinearGradient
+            colors={[colors.background6, colors.background7]}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={themes.gradient}
+          />
+      );
   }
 
   render() {
     console.log(this.props.data);
+    console.log(parseInt(this.props.rowID));
     var slides = this.moveRight();
 
     return (
       <ViewContainer>
+        { this.gradient }
         <StatusBarBackground/>
         <View style={styles.headerContainer}>
           <TouchableOpacity  onPress={() => this.props.navigator.pop()}>
             <View style={styles.innerHeaderContainer}>
-            <Icon name="angle-left" size={20} style={styles.arrowIcon} />
+            <Icon name="angle-left" size={30} style={styles.arrowIcon} />
             <Spacer/>
-            <Text>Backshit</Text>
+            <Text style={styles.headerText}>Back</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -56,7 +82,16 @@ class FlashCards extends Component {
             ref={(carousel) => { this._carousel = carousel; }}
             sliderWidth={sliderWidth}
             itemWidth={itemWidth}
-            firstItem={4}
+            firstItem={parseInt(this.props.rowID)}
+            renderItem={this._renderItemWithParallax}
+            inactiveSlideScale={0.94}
+            inactiveSlideOpacity={0.6}
+            hasParallaxImages={true}
+            enableMomentum={false}
+            containerCustomStyle={themes.slider}
+            contentContainerCustomStyle={themes.sliderContentContainer}
+            scrollEndDragDebounceValue={Platform.OS === 'ios' ? 0 : 100}
+            onSnapToItem={(index) => this.setState({ slider1ActiveSlide: index }) }
           >
               { slides }
           </Carousel>
@@ -79,7 +114,8 @@ class FlashCards extends Component {
     var comp = []
     for (let key of mapper.keys()) {
       console.log(mapper.get(key), key);
-      comp.push({title: mapper.get(key), subtitle: key});
+      let imahe = 'https://d4n5pyzr6ibrc.cloudfront.net/media/27FB7F0C-9885-42A6-9E0C19C35242B5AC/4785B1C2-8734-405D-96DC23A6A32F256B/thul-90efb785-97af-5e51-94cf-503fc81b6940.jpg'
+      comp.push({title: key, subtitle: mapper.get(key), illustration: imahe});
     }
     // console.log('move right', data);
     var DynamicContent = comp.map(function(list) {
@@ -96,6 +132,7 @@ class FlashCards extends Component {
     return comp.map((entry, index) => {
         return (
             <SliderEntry
+              data={entry}
               key={`carousel-entry-${index}`}
               even={(index + 1) % 2 === 0}
               {...entry}
@@ -120,13 +157,18 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     flexDirection: "row",
-    margin: 20
+    // backgroundColor: colors.background1
   },
   arrowIcon: {
-    color: "green"
+    color: "white",
+    fontWeight: 'bold'
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 20
   },
   headerContainer: {
-    margin: 10,
+    // margin: 10,
     borderBottomColor: "rgba(92,94,94,0.5)",
     borderBottomWidth: 0.25,
     paddingBottom: 10

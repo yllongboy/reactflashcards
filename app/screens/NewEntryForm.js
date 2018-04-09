@@ -19,6 +19,9 @@ import Button from '../components/Button';
 import Spacer from '../components/Spacer';
 import ViewContainer from '../components/ViewContainer'
 import StatusBarBackground from '../components/StatusBarBackground'
+import themes, { colors } from '../styles/Default';
+import LinearGradient from 'react-native-linear-gradient';
+
 
 class NewEntryForm extends Component {
 
@@ -29,16 +32,29 @@ class NewEntryForm extends Component {
       definition: ''
     };
   }
+
+  get gradient () {
+      return (
+          <LinearGradient
+            colors={['#16A085', '#F4D03F']}
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={themes.gradient}
+          />
+      );
+  }
+
   render() {
     return (
       <ViewContainer>
+        {this.gradient}
         <StatusBarBackground/>
         <View style={styles.headerContainer}>
           <TouchableOpacity  onPress={() => this.props.navigator.pop()}>
             <View style={styles.innerHeaderContainer}>
-            <Icon name="angle-left" size={20} style={styles.arrowIcon} />
+            <Icon name="angle-left" size={30} style={styles.arrowIcon} />
             <Spacer/>
-            <Text>Back</Text>
+            <Text style={styles.headerText}>Back</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -46,7 +62,8 @@ class NewEntryForm extends Component {
           <TextField
             label={'Enter a new word'}
             ref={'sit'}
-            highlightColor={'#009688'}
+            labelColor={'white'}
+            highlightColor={'white'}
             autoCapitalize= "none"
             onChangeText={(text) => {
               this.state.newWord = text;
@@ -56,7 +73,8 @@ class NewEntryForm extends Component {
         <View style={styles.inputContainer}>
           <TextField
             label={'Definition'}
-            highlightColor={'#009688'}
+            labelColor={'white'}
+            highlightColor={'white'}
             autoCapitalize= "none"
             onChangeText={(text) => {
               this.state.definition = text;
@@ -67,7 +85,7 @@ class NewEntryForm extends Component {
 
         <Spacer/>
         <View style={[styles.inputContainer, {borderBottomWidth: 0}]}>
-          <Button onPress={() => this.saveData()}>
+          <Button onPress={() => this.saveData()} style={styles.buttonStyle8}>
             Add
           </Button>
         </View>
@@ -82,12 +100,14 @@ class NewEntryForm extends Component {
 
   }
 
-  showPopUp(message) {
-
-  }
   async saveData() {
     if(!this.state.newWord || !this.state.definition) {
-      AlertIOS.alert("All fields are Mandatory.")
+      if(Platform.OS == 'android')
+        Alert.alert("Error", "All fields are Mandatory.")
+      else
+        AlertIOS.alert("All fields are Mandatory.")
+
+
     } else {
 
         try {
@@ -115,16 +135,21 @@ class NewEntryForm extends Component {
 const styles = StyleSheet.create({
   inputContainer: {
     margin: 10,
-    borderBottomColor: "rgba(92,94,94,0.5)",
+    borderBottomColor: "rgba(0,0,0,0.5)",
   },
   input: {
     height: 40,
-    color: "#A6AAAB",
+    color: "white",
     padding: 5,
     fontSize: 16
   },
   arrowIcon: {
-    color: "green",
+    color: "white",
+    fontWeight: 'bold'
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 20
   },
   headerContainer: {
     margin: 10,
@@ -135,6 +160,12 @@ const styles = StyleSheet.create({
   innerHeaderContainer: {
     flexDirection: "row",
     alignItems: "center"
-  }
+  },
+  buttonStyle8: {
+    backgroundColor: 'transparent',
+    borderColor: 'white',
+    borderWidth: 1,
+    borderRadius: 22,
+  },
 })
 module.exports = NewEntryForm
